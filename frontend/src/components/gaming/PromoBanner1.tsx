@@ -23,6 +23,7 @@ export default function PromoBanner1({ href = '#' }: PromoBanner1Props) {
           priority
           sizes="100vw"
           className="h-auto w-full object-cover transition-transform duration-300 group-hover:scale-[1.01]"
+          style={{ height: 'auto' }}
         />
       </div>
 
@@ -36,6 +37,7 @@ export default function PromoBanner1({ href = '#' }: PromoBanner1Props) {
           priority
           sizes="(max-width: 1024px) 100vw, 1200px"
           className="h-auto w-full object-cover transition-transform duration-300 group-hover:scale-[1.01]"
+          style={{ height: 'auto' }}
         />
       </div>
     </a>

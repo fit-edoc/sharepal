@@ -17,6 +17,7 @@ export default function HeroBanner() {
           width={500}
           alt="gaming left"
           className="h-[140px] sm:h-[160px] md:h-[190px] lg:h-[255px] w-auto object-contain"
+          style={{ width: 'auto' }}
         />
       </div>
 
@@ -36,17 +37,38 @@ export default function HeroBanner() {
         <div className="mt-6 flex  items-center justify-start gap-3 sm:mt-5 sm:justify-center sm:gap-6">
           {/* Xbox */}
           <div className="flex items-center gap-1.5 opacity-90 transition-opacity hover:opacity-100">
-            <Image height={32} width={80} src="/xbox.svg" alt="xbox" className="h-6 sm:h-7 md:h-8 w-auto object-contain" />
+            <Image
+              height={32}
+              width={80}
+              src="/xbox.svg"
+              alt="xbox"
+              className="h-6 sm:h-7 md:h-8 w-auto object-contain"
+              style={{ width: 'auto' }}
+            />
           </div>
 
           {/* PS5 */}
           <div className="flex items-center gap-1.5 border-l-2 border-r-2 border-purple-600/50 px-2 opacity-90 transition-opacity hover:opacity-100 sm:border-l-4 sm:border-r-4 sm:px-3">
-            <Image height={32} width={80} src="/ps5.svg" alt="ps5" className="h-6 sm:h-7 md:h-8 w-auto object-contain" />
+            <Image
+              height={32}
+              width={80}
+              src="/ps5.svg"
+              alt="ps5"
+              className="h-6 sm:h-7 md:h-8 w-auto object-contain"
+              style={{ width: 'auto' }}
+            />
           </div>
 
           {/* Sony */}
           <div className="flex items-center gap-1.5 opacity-90 transition-opacity hover:opacity-100">
-            <Image height={32} width={80} src="/sony.svg" alt="sony" className="h-6 sm:h-7 md:h-8 w-auto object-contain" />
+            <Image
+              height={32}
+              width={80}
+              src="/sony.svg"
+              alt="sony"
+              className="h-6 sm:h-7 md:h-8 w-auto object-contain"
+              style={{ width: 'auto' }}
+            />
           </div>
         </div>
       </div>
@@ -59,6 +81,7 @@ export default function HeroBanner() {
           width={500}
           alt="gaming right"
           className="h-[120px] sm:h-[160px] md:h-[190px] lg:h-[255px] w-auto object-contain"
+          style={{ width: 'auto' }}
         />
       </div>
     </div>
