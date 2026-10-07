@@ -46,7 +46,7 @@ export default function HeroBanner() {
 
           {/* Sony */}
           <div className="flex items-center gap-1.5 opacity-90 transition-opacity hover:opacity-100">
-            <Image height={32} width={80} src="/Sony.svg" alt="sony" className="h-6 sm:h-7 md:h-8 w-auto object-contain" />
+            <Image height={32} width={80} src="/sony.svg" alt="sony" className="h-6 sm:h-7 md:h-8 w-auto object-contain" />
           </div>
         </div>
       </div>

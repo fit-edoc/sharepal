@@ -7,6 +7,7 @@ import CategoryTabs from '@/components/gaming/CategoryTabs';
 import Sidebar from '@/components/gaming/Sidebar';
 import HeroBanner from '@/components/gaming/HeroBanner';
 import ProductCard, { Product } from '@/components/gaming/ProductCard';
+import ProductCardSkeleton from '@/components/gaming/ProductCardSkeleton';
 import PromoBanner1 from '@/components/gaming/PromoBanner1';
 import PromoBanner2 from '@/components/gaming/PromoBanner2';
 import FloatingDateBar from '@/components/gaming/FloatingDateBar';
@@ -21,7 +22,10 @@ export default function GamingGadgetsPage() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        const res = await fetch('/product-list.json');
+        const [res] = await Promise.all([
+          fetch('/product-list.json'),
+          new Promise((resolve) => setTimeout(resolve, 500)),
+        ]);
         if (res.ok) {
           const data = await res.json();
           setProducts(data.products || []);
@@ -64,16 +68,8 @@ export default function GamingGadgetsPage() {
   const chunk2 = useMemo(() => filteredProducts.slice(4, 8), [filteredProducts]);
   const chunk3 = useMemo(() => filteredProducts.slice(8), [filteredProducts]);
 
-  const handleAddToCart = (item: Product) => {
-    dispatch(
-      addToCart({
-        id: item.id,
-        name: item.name,
-        image: item.image,
-        per_day_rent: item.per_day_rent,
-        tag: item.tag,
-      })
-    );
+  const handleAddToCart = (_item: Product) => {
+    // Redux state sync is handled directly inside ProductCard
   };
 
   return (
@@ -111,11 +107,8 @@ export default function GamingGadgetsPage() {
 
             {loading ? (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {[1, 2, 3, 4].map((n) => (
-                  <div
-                    key={n}
-                    className="h-72 animate-pulse rounded-2xl bg-neutral-200"
-                  />
+                {Array.from({ length: 8 }).map((_, n) => (
+                  <ProductCardSkeleton key={n} />
                 ))}
               </div>
             ) : filteredProducts.length === 0 ? (
