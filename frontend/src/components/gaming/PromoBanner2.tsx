@@ -2,6 +2,7 @@
 
 export default function PromoBanner2() {
   return (
+    <a href="https://earnwithus.sharepal.in/">
     <div className="relative my-8 w-full overflow-hidden rounded-2xl bg-gradient-to-r from-[#1d4ed8] via-[#2563eb] to-[#3b82f6] p-6 text-white shadow-lg md:p-8">
       {/* Background radial glow */}
       <div className="pointer-events-none absolute -left-10 -bottom-10 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
@@ -24,5 +25,6 @@ export default function PromoBanner2() {
         </button>
       </div>
     </div>
+    </a>
   );
 }

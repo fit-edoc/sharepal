@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { openCart } from '@/store/cartSlice';
 import { openDateModal } from '@/store/rentalSlice';
@@ -108,9 +108,20 @@ const Logo = () => (
   </div>
 );
 
+/* ---------- Tier-1 Cities in India ---------- */
+export const TIER_1_CITIES = [
+  { name: 'Bangalore', state: 'Karnataka', isPopular: true },
+  { name: 'Mumbai', state: 'Maharashtra', isPopular: true },
+  { name: 'Delhi NCR', state: 'Delhi & NCR', isPopular: true },
+  { name: 'Hyderabad', state: 'Telangana', isPopular: true },
+  { name: 'Chennai', state: 'Tamil Nadu', isPopular: true },
+];
+
 /* ---------- Main Navbar ---------- */
 export default function Navbar() {
   const [city, setCity] = useState('Bangalore');
+  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+  const cityDropdownRef = useRef<HTMLDivElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const dispatch = useAppDispatch();
   const totalQuantity = useAppSelector((state) => state.cart.totalQuantity);
@@ -122,9 +133,27 @@ export default function Navbar() {
     dispatch(openDateModal(null));
   };
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        cityDropdownRef.current &&
+        !cityDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsCityDropdownOpen(false);
+      }
+    };
+    if (isCityDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isCityDropdownOpen]);
+
   return (
     <header
-      className="fixed left-0 right-0 top-0 z-50 flex h-max w-full flex-col items-center justify-center gap-1 overflow-hidden bg-[#4C187C] pb-3 pt-[env(safe-area-inset-top)] opacity-100 transition-all duration-500 md:pb-4 lg:flex-row"
+      className="fixed left-0 right-0 top-0 z-50 flex h-max w-full flex-col items-center justify-center gap-1 overflow-visible bg-[#4C187C] pb-3 pt-[env(safe-area-inset-top)] opacity-100 transition-all duration-500 md:pb-4 lg:flex-row"
     >
       {/* ============ DESKTOP ============ */}
       <div className="container hidden w-full items-end justify-between gap-1 transition-all lg:flex">
@@ -139,15 +168,77 @@ export default function Navbar() {
 
         {/* Middle — City + Dates */}
         <div className="middle relative flex items-center justify-center gap-2 rounded-full border-2 border-purple-500 bg-gray-100 p-0.5 shadow-sm">
-          <button
-            type="button"
-            onClick={() => setCity(city === 'Bangalore' ? 'Mumbai' : 'Bangalore')}
-            className="city flex items-center justify-center gap-1 rounded-l-full bg-neutral-200 p-1.5 px-[10px] py-[6px] text-sm font-semibold text-primary-900 bg hover:bg-neutral-250 transition-colors"
-          >
-            <LocationIcon />
-            <p className="min-w-16 text-bt3">{city}</p>
-            <ChevronDownIcon />
-          </button>
+          {/* Custom City Selector Dropdown */}
+          <div className="relative" ref={cityDropdownRef}>
+            <button
+              type="button"
+              onClick={() => setIsCityDropdownOpen((prev) => !prev)}
+              aria-expanded={isCityDropdownOpen}
+              aria-label="Select City"
+              className="city flex items-center justify-center gap-1.5 rounded-l-full px-2 p-1.5 px-[12px] py-[6px] text-sm font-semibold text-primary-900 hover:bg-neutral-250 transition-colors cursor-pointer"
+            >
+              <LocationIcon className="w-4 h-4 text-[#4C187C]" />
+              <p className="min-w-14 text-bt3 font-bold text-neutral-900">{city}</p>
+              <ChevronDownIcon
+                className={`w-3.5 h-3.5 text-neutral-600 transition-transform duration-200 ${
+                  isCityDropdownOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {/* Desktop Dropdown Popover */}
+            {isCityDropdownOpen && (
+              <div className="absolute left-0 top-full mt-2 w-64 rounded-2xl border border-neutral-200 bg-white p-2 shadow-2xl z-50">
+                <div className="flex items-center justify-between border-b border-neutral-100 px-3 py-2">
+                  <div>
+                    <h4 className="text-xs font-bold text-neutral-900">Select City</h4>
+                    <p className="text-[10px] text-neutral-500">5 Tier-1 Serviceable Cities</p>
+                  </div>
+                  <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[9px] font-bold text-[#4C187C]">
+                    Tier 1
+                  </span>
+                </div>
+
+                <div className="mt-1 flex flex-col gap-0.5">
+                  {TIER_1_CITIES.map((c) => {
+                    const isSelected = city === c.name;
+                    return (
+                      <button
+                        key={c.name}
+                        type="button"
+                        onClick={() => {
+                          setCity(c.name);
+                          setIsCityDropdownOpen(false);
+                        }}
+                        className={`flex items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-colors cursor-pointer ${
+                          isSelected
+                            ? 'bg-purple-50 font-bold text-[#4C187C]'
+                            : 'text-neutral-700 hover:bg-neutral-100 font-medium'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span
+                            className={`flex h-2 w-2 rounded-full ${
+                              isSelected ? 'bg-[#4C187C]' : 'bg-neutral-300'
+                            }`}
+                          />
+                          <div>
+                            <span className="text-xs font-bold">{c.name}</span>
+                            <span className="block text-[10px] text-neutral-400">
+                              {c.state}
+                            </span>
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <span className="text-xs font-black text-[#4C187C]">✓</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Interactive Date Selection Area */}
           <div
@@ -250,11 +341,17 @@ export default function Navbar() {
           <div className="flex w-full items-center justify-end gap-1.5 pt-1.5 fill-gray-100 text-gray-900 md:gap-4">
             <button
               type="button"
-              className="city flex items-center justify-center gap-1 rounded-full bg-purple-600 px-2 py-1.5 text-xs font-semibold text-gray-100 shadow-md"
+              onClick={() => setIsCityDropdownOpen((prev) => !prev)}
+              aria-label="Select City"
+              className="city flex items-center justify-center gap-1 rounded-full bg-purple-600 px-2.5 py-1.5 text-xs font-semibold text-gray-100 shadow-md cursor-pointer active:scale-95 transition-transform"
             >
               <LocationIcon className="w-4 fill-gray-100 md:w-5" />
-              <p className="min-w-4 text-bt4">{city}</p>
-              <ChevronDownIcon className="w-3 font-bold md:w-4" />
+              <p className="min-w-4 text-bt4 font-bold">{city}</p>
+              <ChevronDownIcon
+                className={`w-3 font-bold transition-transform duration-200 ${
+                  isCityDropdownOpen ? 'rotate-180' : ''
+                }`}
+              />
             </button>
 
             {/* Mobile Cart Button */}
@@ -320,6 +417,72 @@ export default function Navbar() {
           </button>
         </div>
       </div>
+
+      {/* Mobile City Selector Modal Sheet */}
+      {isCityDropdownOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs lg:hidden"
+          onClick={() => setIsCityDropdownOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-neutral-900">Select City</h3>
+                <p className="text-xs text-neutral-500">5 Tier-1 Serviceable Cities</p>
+              </div>
+              <button
+                onClick={() => setIsCityDropdownOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-3 flex flex-col gap-2">
+              {TIER_1_CITIES.map((c) => {
+                const isSelected = city === c.name;
+                return (
+                  <button
+                    key={c.name}
+                    type="button"
+                    onClick={() => {
+                      setCity(c.name);
+                      setIsCityDropdownOpen(false);
+                    }}
+                    className={`flex items-center justify-between rounded-2xl p-3 text-left transition-colors cursor-pointer ${
+                      isSelected
+                        ? 'border-2 border-[#4C187C] bg-purple-50 text-[#4C187C]'
+                        : 'border border-neutral-200 bg-neutral-50/60 text-neutral-800 hover:bg-neutral-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-xl ${
+                          isSelected
+                            ? 'bg-[#4C187C] text-white'
+                            : 'bg-neutral-200 text-neutral-700'
+                        }`}
+                      >
+                        <LocationIcon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold">{c.name}</div>
+                        <div className="text-[11px] text-neutral-400">{c.state}</div>
+                      </div>
+                    </div>
+                    {isSelected && (
+                      <span className="text-base font-black text-[#4C187C]">✓</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

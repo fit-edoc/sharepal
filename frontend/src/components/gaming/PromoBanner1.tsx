@@ -6,7 +6,7 @@ interface PromoBanner1Props {
   href?: string;
 }
 
-export default function PromoBanner1({ href = '#' }: PromoBanner1Props) {
+export default function PromoBanner1({ href = 'https://assets.sharepal.in/' }: PromoBanner1Props) {
   return (
     <a
       href={href}
