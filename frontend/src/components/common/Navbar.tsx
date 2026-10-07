@@ -121,7 +121,7 @@ export default function Navbar() {
       <div className="container hidden w-full items-end justify-between gap-1 transition-all lg:flex">
         {/* Left — Logo */}
         <div className="flex items-end justify-start gap-28">
-          <Link href="/bangalore" className="left h-full flex-[1]">
+          <Link href="/" className="left h-full flex-[1]">
             <div className="logo flex h-[68px] w-40 flex-col items-center justify-end gap-1 rounded-bl-2xl rounded-br-2xl bg-[#001aff] p-3 pt-[18px] shadow-sm">
               <Logo />
             </div>
