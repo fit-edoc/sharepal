@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { addToCart, decreaseQuantity } from '@/store/cartSlice';
+import { openDateModal } from '@/store/rentalSlice';
 export { default as ProductCardSkeleton } from './ProductCardSkeleton';
 
 export interface Product {
@@ -25,6 +26,9 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   const dispatch = useAppDispatch();
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  // Rental state
+  const { isDatesSelected, days } = useAppSelector((state) => state.rental);
+
   // Sync quantity with Redux cart state
   const cartItem = useAppSelector((state) =>
     state.cart.items.find((item) => item.id === product.id)
@@ -32,9 +36,39 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   const quantity = cartItem?.quantity || 0;
   const isOutOfStock = product.out_of_stock;
 
+  const handleCardClick = () => {
+    if (isOutOfStock) return;
+    // Clicking card opens custom calendar modal to select dates and view calculated price
+    dispatch(
+      openDateModal({
+        id: product.id,
+        name: product.name,
+        image: product.image,
+        per_day_rent: product.per_day_rent,
+        tag: product.tag,
+        rating: product.rating,
+      })
+    );
+  };
+
   const handleIncrement = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (isOutOfStock) return;
+
+    // If dates are not chosen yet, open modal first to pick dates & see price
+    if (!isDatesSelected) {
+      dispatch(
+        openDateModal({
+          id: product.id,
+          name: product.name,
+          image: product.image,
+          per_day_rent: product.per_day_rent,
+          tag: product.tag,
+          rating: product.rating,
+        })
+      );
+      return;
+    }
 
     dispatch(
       addToCart({
@@ -58,20 +92,17 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
     }
   };
 
+  const calculatedPrice = product.per_day_rent * (days || 1);
+
   return (
     <div
-      onClick={(e) => {
-        // If not out of stock and not yet added, clicking card adds 1 and expands counter
-        if (!isOutOfStock && quantity === 0) {
-          handleIncrement(e);
-        }
-      }}
+      onClick={handleCardClick}
       className={`group relative flex flex-col justify-between rounded-2xl border bg-white p-3.5 sm:p-4 transition-all duration-300 ${
         isOutOfStock
           ? 'opacity-80 cursor-not-allowed border-neutral-100'
           : quantity > 0
-          ? 'border-neutral-900/25 shadow-md ring-1 ring-neutral-900/10'
-          : 'border-neutral-100 shadow-xs hover:border-neutral-250 hover:shadow-md cursor-pointer'
+          ? 'border-neutral-900/25 shadow-md ring-1 ring-neutral-900/10 cursor-pointer'
+          : 'border-neutral-100 shadow-xs hover:border-purple-300 hover:shadow-md cursor-pointer'
       }`}
     >
       {/* Top row: Badge or Spacer */}
@@ -143,16 +174,49 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
 
         {/* Pricing & Add to Cart / Counter */}
         <div className="flex items-end justify-between border-t border-neutral-100 pt-2 gap-2">
-          <div className="flex min-w-0 flex-col">
-            <span className="truncate text-[10px] sm:text-[11px] font-medium text-neutral-400">
-              Select Dates to view price
-            </span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-sm font-bold text-neutral-900 md:text-base">
-                ₹ {product.per_day_rent}
-              </span>
-              <span className="text-[11px] text-neutral-500">/day</span>
-            </div>
+          {/* Price display: Hidden with blur if dates not selected; shows calculated price if selected */}
+          <div className="flex min-w-0 flex-1 flex-col">
+            {isDatesSelected ? (
+              <div>
+                <span className="inline-block rounded-md bg-purple-50 px-1.5 py-0.5 text-[10px] font-bold text-[#4C187C] border border-purple-200/50">
+                  {days} Days Rent
+                </span>
+                <div className="mt-0.5 flex items-baseline gap-1">
+                  <span className="text-sm font-black text-neutral-900 md:text-base">
+                    ₹ {calculatedPrice}
+                  </span>
+                  <span className="text-[10px] text-neutral-500 font-medium">
+                    (₹{product.per_day_rent}/d)
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="relative flex flex-col justify-center">
+                <span className="truncate text-[10px] font-medium text-neutral-400">
+                  Select dates to view price
+                </span>
+                <div className="relative mt-0.5 inline-flex items-center">
+                  {/* Blurred price */}
+                  <div className="flex select-none items-baseline gap-1 filter blur-[5px] opacity-35">
+                    <span className="text-sm font-bold text-neutral-900 md:text-base">
+                      ₹ 999
+                    </span>
+                    <span className="text-[11px] text-neutral-500">/day</span>
+                  </div>
+                  {/* Subtle clickable badge overlay */}
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-[#4C187C] border border-purple-200/70 shadow-2xs backdrop-blur-xs group-hover:bg-purple-100 group-hover:border-purple-300 transition-all">
+                      <svg className="w-2.5 h-2.5 text-[#4C187C]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                      </svg>
+                      View Price
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Action Button: Expands into Quantity Counter when added */}
@@ -166,7 +230,11 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
                     ? 'cursor-not-allowed border-neutral-200 text-neutral-300'
                     : 'border-neutral-900 bg-white text-neutral-900 hover:bg-neutral-900 hover:text-white shadow-xs'
                 }`}
-                aria-label={`Add ${product.name} to rental cart`}
+                aria-label={
+                  isDatesSelected
+                    ? `Add ${product.name} to rental cart`
+                    : `Select rental dates for ${product.name}`
+                }
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M12 5v14M5 12h14" />
@@ -218,3 +286,4 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
     </div>
   );
 }
+

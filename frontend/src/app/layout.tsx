@@ -4,6 +4,7 @@ import StoreProvider from "@/store/StoreProvider";
 import CartDrawer from "@/components/cart/CartDrawer";
 import BottomNav from "@/components/navigation/BottomNav";
 import FloatingCartBar from "@/components/cart/FloatingCartBar";
+import RentalDateModal from "@/components/common/RentalDateModal";
 
 export default function RootLayout({
   children,
@@ -16,6 +17,7 @@ export default function RootLayout({
         <StoreProvider>
           <Navbar />
           <main>{children}</main>
+          <RentalDateModal />
           <CartDrawer />
           <FloatingCartBar />
           <BottomNav />

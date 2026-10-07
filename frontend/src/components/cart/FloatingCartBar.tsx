@@ -6,6 +6,7 @@ import { openCart } from '@/store/cartSlice';
 export default function FloatingCartBar() {
   const dispatch = useAppDispatch();
   const { items, totalQuantity, totalAmount } = useAppSelector((state) => state.cart);
+  const { isDatesSelected, days } = useAppSelector((state) => state.rental);
 
   // Only show when there are items in the cart
   if (totalQuantity === 0 || items.length === 0) {
@@ -55,7 +56,10 @@ export default function FloatingCartBar() {
               {totalQuantity} {totalQuantity === 1 ? 'Item' : 'Items'}
             </span>
             <span className="text-[11px] font-semibold text-[#9EFF00]">
-              ₹ {totalAmount} <span className="text-neutral-400">/day</span>
+              ₹ {isDatesSelected ? totalAmount * days : totalAmount}{' '}
+              <span className="text-neutral-400">
+                {isDatesSelected ? `(${days}d)` : '/day'}
+              </span>
             </span>
           </div>
         </div>

@@ -10,11 +10,16 @@ import {
   removeFromCart,
   clearCart,
 } from '@/store/cartSlice';
+import { openDateModal } from '@/store/rentalSlice';
+import { formatFriendlyDate } from '@/components/common/RentalDateModal';
 
 export default function CartDrawer() {
   const dispatch = useAppDispatch();
   const { items, totalQuantity, totalAmount, isCartOpen } = useAppSelector(
     (state) => state.cart
+  );
+  const { isDatesSelected, days, startDate, endDate } = useAppSelector(
+    (state) => state.rental
   );
 
   // Prevent background scrolling when cart drawer is open
@@ -188,20 +193,34 @@ export default function CartDrawer() {
         {items.length > 0 && (
           <div className="border-t border-neutral-100 bg-neutral-50/70 p-5">
             <div className="mb-3 flex items-center justify-between text-xs text-neutral-500">
-              <span>Rental duration estimated</span>
-              <span className="font-semibold text-neutral-700">Per Day Pricing</span>
+              <span>Rental Duration</span>
+              <button
+                onClick={() => {
+                  dispatch(closeCart());
+                  dispatch(openDateModal(null));
+                }}
+                className="font-semibold text-[#4C187C] hover:underline"
+              >
+                {isDatesSelected
+                  ? `${days} Days (${formatFriendlyDate(startDate)} - ${formatFriendlyDate(endDate)}) Edit`
+                  : 'Select Dates'}
+              </button>
             </div>
 
             <div className="mb-4 flex items-baseline justify-between">
               <div>
                 <span className="text-xs font-medium text-neutral-600">Total Rent</span>
-                <p className="text-xs text-neutral-400">Taxes calculated at checkout</p>
+                <p className="text-xs text-neutral-400">
+                  {isDatesSelected ? `₹${totalAmount}/day × ${days} days` : 'Taxes calculated at checkout'}
+                </p>
               </div>
               <div className="text-right">
                 <span className="text-xl font-extrabold text-neutral-900 sm:text-2xl">
-                  ₹ {totalAmount}
+                  ₹ {isDatesSelected ? totalAmount * days : totalAmount}
                 </span>
-                <span className="text-xs text-neutral-500"> /day</span>
+                <span className="text-xs text-neutral-500">
+                  {isDatesSelected ? ` for ${days}d` : ' /day'}
+                </span>
               </div>
             </div>
 

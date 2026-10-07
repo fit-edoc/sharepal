@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { openCart } from '@/store/cartSlice';
+import { openDateModal } from '@/store/rentalSlice';
+import { formatFriendlyDate } from './RentalDateModal';
 
 /* ---------- Icon Components ---------- */
 const LocationIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
@@ -112,6 +114,13 @@ export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const dispatch = useAppDispatch();
   const totalQuantity = useAppSelector((state) => state.cart.totalQuantity);
+  const { startDate, endDate, days, isDatesSelected } = useAppSelector(
+    (state) => state.rental
+  );
+
+  const handleOpenDateModal = () => {
+    dispatch(openDateModal(null));
+  };
 
   return (
     <header
@@ -129,39 +138,66 @@ export default function Navbar() {
         </div>
 
         {/* Middle — City + Dates */}
-        <div className="middle relative flex items-center justify-center gap-2 rounded-full border-2 border-purple-500 bg-gray-100">
+        <div className="middle relative flex items-center justify-center gap-2 rounded-full border-2 border-purple-500 bg-gray-100 p-0.5 shadow-sm">
           <button
             type="button"
             onClick={() => setCity(city === 'Bangalore' ? 'Mumbai' : 'Bangalore')}
-            className="city flex items-center justify-center gap-1 rounded-l-full bg-neutral-200 p-1.5 px-[10px] py-[6px] text-sm font-semibold text-primary-900 bg hover:bg-neutral-250"
+            className="city flex items-center justify-center gap-1 rounded-l-full bg-neutral-200 p-1.5 px-[10px] py-[6px] text-sm font-semibold text-primary-900 bg hover:bg-neutral-250 transition-colors"
           >
             <LocationIcon />
             <p className="min-w-16 text-bt3">{city}</p>
             <ChevronDownIcon />
           </button>
 
+          {/* Interactive Date Selection Area */}
           <div
-            aria-label="Edit Dates"
-            className="flex w-max cursor-pointer items-center justify-center gap-2 bg-gray-100 text-neutral-700"
+            onClick={handleOpenDateModal}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                handleOpenDateModal();
+              }
+            }}
+            aria-label="Edit Rental Dates"
+            className="group flex w-max cursor-pointer items-center justify-center gap-2.5 rounded-full px-2 py-1 bg-gray-100 text-neutral-700 hover:bg-gray-200/80 transition-colors"
           >
-            <div className="delivery-date flex items-center justify-center gap-2 text-sh5">
-              <CalendarIcon />
+            <div className="delivery-date flex items-center justify-center gap-1.5 text-[10px]">
+              <CalendarIcon className="text-[#4C187C]" />
               <p>
-                <span className="font-medium"> Delivery Date: </span> 13th Oct
+                <span className="font-semibold text-neutral-600"> Delivery: </span>
+                <span className="font-bold text-neutral-900">
+                  {isDatesSelected ? formatFriendlyDate(startDate) : 'Select Date'}
+                </span>
               </p>
             </div>
-            <span className="h-5 w-[2px] bg-neutral-200" />
-            <div className="pickup-date flex items-center justify-center gap-2 text-sh5">
-              <PickupCalendarIcon />
+            <span className="h-5 w-[2px] bg-neutral-300" />
+            <div className="pickup-date flex items-center justify-center gap-1.5 text-[10px]">
+              <PickupCalendarIcon className="text-[#4C187C]" />
               <p>
-                <span className="font-medium"> Pickup Date: </span> 15th Oct
+                <span className="font-semibold text-neutral-600"> Pickup: </span>
+                <span className="font-bold text-neutral-900 text-nowrap">
+                  {isDatesSelected ? formatFriendlyDate(endDate) : 'Select Date'}
+                </span>
               </p>
             </div>
+
+            {isDatesSelected && days > 0 && (
+              <span className="rounded-full bg-[#9EFF00] px-2 py-0.5 text-[11px] font-black text-neutral-950">
+                {days}d
+              </span>
+            )}
           </div>
 
-          <button className="inline-flex   h-full items-center justify-center gap-1 whitespace-nowrap rounded-4xl bg-black px-3 py-[8px] !text-bt3 text-sm font-medium text-white transition-colors hover:bg-primary-900 active:opacity-90">
+          <button
+            onClick={handleOpenDateModal}
+            aria-label="Edit rental dates in calendar"
+            className="inline-flex h-full items-center justify-center gap-1 whitespace-nowrap rounded-4xl bg-black px-3 py-[8px] !text-bt3 text-sm font-medium text-white transition-colors hover:bg-neutral-800 active:scale-95"
+          >
             <EditIcon />
-            <p className="pr-1 font-semibold leading-5 tracking-wide">Edit</p>
+            <p className="pr-1 font-semibold leading-5 tracking-wide">
+              {isDatesSelected ? 'Edit' : 'Pick Dates'}
+            </p>
           </button>
         </div>
 
@@ -199,11 +235,11 @@ export default function Navbar() {
       </div>
 
       {/* ============ MOBILE ============ */}
-      <div className="mobile container flex w-full flex-col items-center justify-center gap-3  lg:hidden  px-4">
+      <div className="mobile container flex w-full flex-col items-center justify-center gap-3 lg:hidden px-4">
         {/* Top row — Logo + location + cart + profile */}
         <div className="flex h-full w-full items-center justify-between gap-1">
           <Link
-            href="/bangalore"
+            href="/"
             className="logo flex h-10 flex-col items-center justify-end gap-1 rounded-bl-xl rounded-br-xl bg-[#0004ff] px-4 pb-1 pt-3"
           >
             <div className="flex w-full max-w-28 items-center justify-center">
@@ -211,10 +247,10 @@ export default function Navbar() {
             </div>
           </Link>
 
-          <div className="flex w-full items-center justify-end  gap-1.5 pt-1.5 fill-gray-100 text-gray-900 md:gap-4">
+          <div className="flex w-full items-center justify-end gap-1.5 pt-1.5 fill-gray-100 text-gray-900 md:gap-4">
             <button
               type="button"
-              className="city flex items-center justify-center gap-1 rounded-full b bg-purple-600 px-2 py-1.5 text-xs font-semibold text-gray-100 shadow-md"
+              className="city flex items-center justify-center gap-1 rounded-full bg-purple-600 px-2 py-1.5 text-xs font-semibold text-gray-100 shadow-md"
             >
               <LocationIcon className="w-4 fill-gray-100 md:w-5" />
               <p className="min-w-4 text-bt4">{city}</p>
@@ -225,7 +261,7 @@ export default function Navbar() {
             <button
               onClick={() => dispatch(openCart())}
               aria-label={`Open Cart (${totalQuantity} items)`}
-              className="relative flex h-8 min-h-8 w-8 min-w-8 items-center justify-center rounded-full border-2 border-solid border-neutral-200 bg-neutral-100 p-0.5 text-gray-800 hover:bg-neutral-950 hover:text-white transition-colors"
+              className="relative hidden md:flex h-8 min-h-8 w-8 min-w-8 items-center justify-center rounded-full border-2 border-solid border-neutral-200 bg-neutral-100 p-0.5 text-gray-800 hover:bg-neutral-950 hover:text-white transition-colors"
             >
               <CartIcon className="w-4 h-4" />
               {totalQuantity > 0 && (
@@ -247,19 +283,40 @@ export default function Navbar() {
         </div>
 
         {/* Bottom row — Rent dates + Edit */}
-        <div className="flex h-[34px] w-full items-center justify-between gap-1 rounded-full border-2 border-category-purple bg-gray-100">
-          <div className="flex w-max items-center justify-center gap-2 px-4 text-sm">
-            <div className="delivery-date flex items-center justify-center gap-1 px-0 text-xs font-semibold lg:text-sm">
-              <CalendarIcon className="mx-1 w-4 text-black" />
-              <p className="text-sh5 text-neutral-700">
-                <span className="text-neutral-400">Rent For: </span>13th Oct • 15th Oct
+        <div
+          onClick={handleOpenDateModal}
+          role="button"
+          tabIndex={0}
+          className="flex h-[36px] w-full cursor-pointer items-center justify-between gap-1 rounded-full border-2 border-purple-400 bg-gray-100 active:scale-[0.99] transition-transform"
+        >
+          <div className="flex w-max items-center justify-center gap-2 px-3 text-sm">
+            <div className="delivery-date flex items-center justify-center gap-1.5 px-0 text-xs font-semibold lg:text-sm">
+              <CalendarIcon className="w-3.5 h-3.5 text-[#4C187C]" />
+              <p className="text-sh5 text-neutral-800">
+                <span className="text-neutral-500 font-medium">Rent: </span>
+                {isDatesSelected ? (
+                  <span className="font-bold text-[#4C187C]">
+                    {formatFriendlyDate(startDate)} • {formatFriendlyDate(endDate)} ({days}d)
+                  </span>
+                ) : (
+                  <span className="font-medium text-neutral-500">
+                    Tap to select rental dates
+                  </span>
+                )}
               </p>
             </div>
           </div>
 
-          <button className="add-date inline-flex h-full items-center justify-center gap-1 whitespace-nowrap rounded-4xl bg-black px-2 py-[6px] pr-3 text-sm font-medium text-white transition-colors hover:bg-primary-900 active:opacity-90 max-lg:text-xs">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenDateModal();
+            }}
+            className="add-date inline-flex h-full items-center justify-center gap-1 whitespace-nowrap rounded-4xl bg-black px-3 py-[6px] text-xs font-medium text-white transition-colors hover:bg-neutral-800 active:opacity-90"
+          >
             <EditIcon className="min-h-3 min-w-3" />
-            Edit
+            {isDatesSelected ? 'Edit' : 'Select'}
           </button>
         </div>
       </div>
